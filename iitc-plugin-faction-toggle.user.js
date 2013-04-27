@@ -1,11 +1,11 @@
 // ==UserScript==
 // @id             iitc-plugin-faction-toggle@jim
 // @name           IITC plugin: Limit viewable portals by specific faction
-// @version        0.0.1.20130427.094600
+// @version        0.0.1.20130427.094610
 // @namespace      https://github.com/TwoOneSix/iitc-plugins
 // @updateURL      https://github.com/TwoOneSix/iitc-plugins/iitc-plugin-faction-toggle.meta.js
 // @downloadURL    https://github.com/TwoOneSix/iitc-plugins/iitc-plugin-faction-toggle.user.js
-// @description    [2013-04-27-094600] Limit viewable portals by specific faction
+// @description    [2013-04-27-094610] Limit viewable portals by specific faction
 // @include        https://www.ingress.com/intel*
 // @include        http://www.ingress.com/intel*
 // @match          https://www.ingress.com/intel*
@@ -87,7 +87,7 @@ window.plugin.factiontoggle.displayPL = function() {
 var setup =  function() {
   $('#toolbox').append(' <a onclick="window.plugin.factiontoggle.hideFaction(1)" title="Hide Resistance Portals">Hide Res</a>');
   $('#toolbox').append(' <a onclick="window.plugin.factiontoggle.hideFaction(2)" title="Hide Enlightened Portals">Hide Enl</a>');
-  //add layer option
+  //add layer options
   //plugin.factiontoggle.showEnl = new L.LayerGroup();
   //plugin.factiontoggle.showRes = new L.LayerGroup();
   //window.layerChooser.addOverlay(plugin.factiontoggle.showEnl, 'Enlightened');
