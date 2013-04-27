@@ -1,11 +1,11 @@
 // ==UserScript==
 // @id             iitc-plugin-faction-toggle@jim
-// @name           IITC plugin: Limit viewable portals by specific faction and/or level
-// @version        0.0.1.@@DATETIMEVERSION@@
+// @name           IITC plugin: Limit viewable portals by specific faction
+// @version        0.0.1.20130427.094600
 // @namespace      https://github.com/TwoOneSix/iitc-plugins
-// @updateURL      @@UPDATEURL@@
-// @downloadURL    https://github.com/TwoOneSix/iitc-plugins/iitc-plugin-faction-toggle
-// @description    [@@BUILDNAME@@-@@BUILDDATE@@] Limit viewable portals by specific faction and/or level
+// @updateURL      https://github.com/TwoOneSix/iitc-plugins/iitc-plugin-faction-toggle.meta.js
+// @downloadURL    https://github.com/TwoOneSix/iitc-plugins/iitc-plugin-faction-toggle.user.js
+// @description    [2013-04-27-094600] Limit viewable portals by specific faction
 // @include        https://www.ingress.com/intel*
 // @include        http://www.ingress.com/intel*
 // @match          https://www.ingress.com/intel*
