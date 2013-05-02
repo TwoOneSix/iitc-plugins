@@ -1,11 +1,11 @@
 // ==UserScript==
-// @id             iitc-plugin-faction-toggle@jim
+// @id             iitc-plugin-faction-toggle@TwoOneSix
 // @name           IITC plugin: Limit viewable portals by specific faction
-// @version        0.0.1.20130427.095510
+// @version        0.0.1.20130501.112017
 // @namespace      https://github.com/TwoOneSix/iitc-plugins
 // @updateURL      https://raw.github.com/TwoOneSix/iitc-plugins/master/iitc-plugin-faction-toggle.meta.js
 // @downloadURL    https://raw.github.com/TwoOneSix/iitc-plugins/master/iitc-plugin-faction-toggle.user.js
-// @description    [2013-04-27-095510] Limit viewable portals by specific faction
+// @description    [2013-05-01-112017] Limit viewable portals by specific faction
 // @include        https://www.ingress.com/intel*
 // @include        http://www.ingress.com/intel*
 // @match          https://www.ingress.com/intel*
@@ -13,8 +13,12 @@
 // ==/UserScript==
 
 /* whatsnew
-* 0.0.1 : initial release, show only portals of a specific faction
-* todo : 
+* 0.1.0 : initial release, allows user to show/hide portals of a specific faction
+* TODO : use a better toggle system?
+* TODO : research more 'hooks'
+*
+* KNOWN ISSUE : 'Hidden' Portals render before being removed
+* KNOWN ISSUE : The system to toggle faction visibility sucks, sorry
 */ 
 
 function wrapper() {
@@ -25,75 +29,77 @@ if(typeof window.plugin !== 'function') window.plugin = function() {};
 
 // use own namespace for plugin
 window.plugin.factiontoggle = function() {};
-    
-window.plugin.factiontoggle.listPortals = []; // structure : name, team, level, resonators = Array, Shields = Array, APgain
-window.plugin.factiontoggle.sortOrder=-1;    
-window.plugin.factiontoggle.enlP = 0;
-window.plugin.factiontoggle.resP = 0;
-window.plugin.factiontoggle.filter=0;
 
-//fill the listPortals array with portals avalaible on the map (level filtered portals will not appear in the table)
-window.plugin.factiontoggle.hideFaction = function(hide) {
-  //filter : 0 = All, 1 = Res, 2 = Enl
-  console.log('** getPortals');
-  var retval=false;
-  
-  window.plugin.factiontoggle.listPortals = [];
-  //get portals informations from IITC
+//handle the map_data updates
+window.plugin.factiontoggle.handleUpdate = function() {
+    if(!requests.isLastRequest('getThinnedEntitiesV2')) return;
+    window.plugin.factiontoggle.toggle(0);
+}
+
+window.plugin.factiontoggle.showEnl = true;
+window.plugin.factiontoggle.showRes = true;
+
+window.plugin.factiontoggle.toggle = function(infact) {
+  infact = typeof infact !== 'undefined' ? infact : 0;
+  //console.log('** Changing Portal Visibility...maybe...(' + infact + ')');
+  var retval = false;
+  var pdown = 0;
+  switch(infact){
+    case 1 :
+      if (window.plugin.factiontoggle.showRes === true) {
+          window.plugin.factiontoggle.showRes = false;
+      } else {
+          window.plugin.factiontoggle.showRes = true;
+          window.requestData();
+      }
+      pdown = 1;
+      break;
+    case 2 :
+      if (window.plugin.factiontoggle.showEnl === true) {
+          window.plugin.factiontoggle.showEnl = false;
+      } else {
+          window.plugin.factiontoggle.showEnl = true;
+          window.requestData();
+      }
+      pdown = 2;
+      break;
+  }
+
+  //console.log('** resStatus: '+ window.plugin.factiontoggle.showRes);
+  //console.log('** enlStatus: '+ window.plugin.factiontoggle.showEnl);
+  //process portal information
   $.each(window.portals, function(i, portal) {
+    retval = true;
 
-    retval=true;
-    //testing
     var d = portal.options.details;
     var name = d.portalV2.descriptiveText.TITLE;
     var guid = portal.options.guid;
     var team = portal.options.team;
       
-    console.log('** GUID: ' + guid);
-    switch (team){
-      case 1 :
-        window.plugin.factiontoggle.resP++;
-        console.log('** Faction: Resistance');
-        if (hide === team){ removeByGuid(guid); }
-        break;
-      case 2 :
-        window.plugin.factiontoggle.enlP++;
-        console.log('** Faction: Enlightened');
-        if (hide === team){ removeByGuid(guid); }
-        break;
+    if (pdown <= 1 && team === 1){
+        if (window.plugin.factiontoggle.showRes === false){ removeByGuid(guid); }
+    } else if (pdown <= 2 && team === 2){
+        if (window.plugin.factiontoggle.showEnl === false){ removeByGuid(guid); }
     }
-    console.log('** Name: ' + name);
   });
 
   return retval;
 }
 
-window.plugin.factiontoggle.displayPL = function() {
-  // debug tools
-  var start = new Date().getTime();
-  console.log('***** Start ' + start);
-
-  window.plugin.factiontoggle.sortOrder=-1;
-  window.plugin.factiontoggle.enlP = 0;
-  window.plugin.factiontoggle.resP = 0;
-
-  if (window.plugin.factiontoggle.getPortals()) {
-    alert('Enlightened: '+window.plugin.factiontoggle.enlP+'<br>Resistance: '+window.plugin.factiontoggle.resP);
-  } else {
-    alert('Nothing to Show!');
-  }
- }
-
 var setup =  function() {
-  $('#toolbox').append(' <a onclick="window.plugin.factiontoggle.hideFaction(1)" title="Hide Resistance Portals">Hide Res</a>');
-  $('#toolbox').append(' <a onclick="window.plugin.factiontoggle.hideFaction(2)" title="Hide Enlightened Portals">Hide Enl</a>');
-  //add layer options
-  //plugin.factiontoggle.showEnl = new L.LayerGroup();
-  //plugin.factiontoggle.showRes = new L.LayerGroup();
-  //window.layerChooser.addOverlay(plugin.factiontoggle.showEnl, 'Enlightened');
-  //window.layerChooser.addOverlay(plugin.factiontoggle.showRes, 'Resistance');
-  //map.addLayer(plugin.factiontoggle.showEnl);
-  //map.addLayer(plugin.factiontoggle.showRes);
+  $('#toolbox').append(' <a id="factiontoggle1" onclick="window.plugin.factiontoggle.toggle(1)" title="Resistance Portals">Hide Res</a>');
+  $('#toolbox').append(' <a id="factiontoggle2" onclick="window.plugin.factiontoggle.toggle(2)" title="Enlightened Portals">Hide Enl</a>');
+  $('a#factiontoggle1').click(function() {
+    $(this).text($(this).text() == 'Show Res' ? 'Hide Res' : 'Show Res');
+    return false;
+  });
+  $('a#factiontoggle2').click(function() {
+    $(this).text($(this).text() == 'Show Enl' ? 'Hide Enl' : 'Show Enl');
+    return false;
+  });
+
+  //handle data updates
+  window.addHook('requestFinished', window.plugin.factiontoggle.handleUpdate);
 
 }
 
